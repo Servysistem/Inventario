@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventario</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+    <h1 class="mt-5">Gestión de Inventario</h1>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <form id="addItemForm">
+                <div class="form-group">
+                    <label for="item_name">Nombre del Artículo</label>
+                    <input type="text" name="item_name" class="form-control" id="item_name" placeholder="Ingrese el nombre del artículo" required>
+                </div>
+                <div class="form-group">
+                    <label for="quantity">Cantidad</label>
+                    <input type="number" name="quantity" class="form-control" id="quantity" placeholder="Ingrese la cantidad" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Precio</label>
+                    <input type="number" step="0.01" name="price" class="form-control" id="price" placeholder="Ingrese el precio" required>
+                </div>
+                <div class="form-group">
+                    <label for="date_added">Fecha de Registro</label>
+                    <input type="date" name="date_added" class="form-control" id="date_added">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Agregar Artículo</button>
+                
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h2>Lista de Inventario</h2>
+        <table id="inventoryTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre del Artículo</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Fecha de Registro</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryBody">
+                <!-- Aquí se añadirán dinámicamente los elementos del inventario -->
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-center mt-5">
+            <button id="clearInventory" class="btn bg-danger text-white">Limpiar Inventario</button>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Función para agregar un artículo al inventario local
+    function addItemToInventory(item) {
+        var inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+        inventory.push(item);
+        localStorage.setItem('inventory', JSON.stringify(inventory));
+        renderInventory();
+    }
+
+    // Función para renderizar el inventario en la tabla
+    function renderInventory() {
+        var inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+        var tableBody = document.getElementById('inventoryBody');
+        tableBody.innerHTML = '';
+
+        inventory.forEach(function(item, index) {
+            var row = `<tr>
+                            <td>${index + 1}</td>
+                            <td>${item.item_name}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.price}</td>
+                            <td>${item.date_added}</td>
+                            <td><button onclick="deleteItem(${index})" class="btn btn-danger btn-sm">Eliminar</button></td>
+                       </tr>`;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    // Función para eliminar un artículo del inventario local
+    function deleteItem(index) {
+        var inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+        inventory.splice(index, 1);
+        localStorage.setItem('inventory', JSON.stringify(inventory));
+        renderInventory();
+    }
+
+    // Evento cuando se envía el formulario de agregar artículo
+    document.getElementById('addItemForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evitar el envío del formulario por defecto
+        
+        var itemName = document.getElementById('item_name').value;
+        var quantity = document.getElementById('quantity').value;
+        var price = document.getElementById('price').value;
+        var dateAdded = document.getElementById('date_added').value;
+        
+        var newItem = {
+            item_name: itemName,
+            quantity: quantity,
+            price: price,
+            date_added: dateAdded
+        };
+        
+        addItemToInventory(newItem);
+
+        // Limpiar el formulario después de agregar el artículo
+        document.getElementById('addItemForm').reset();
+    });
+
+    // Evento para limpiar todo el inventario
+    document.getElementById('clearInventory').addEventListener('click', function() {
+        localStorage.removeItem('inventory');
+        renderInventory();
+    });
+
+    // Al cargar la página, renderizar el inventario almacenado
+    document.addEventListener('DOMContentLoaded', function() {
+        renderInventory();
+    });
+</script>
+
+</body>
+</html>
